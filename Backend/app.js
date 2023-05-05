@@ -10,11 +10,15 @@ dotenv.config({ path: "config/config.env" });
 const errorMiddleware = require("./middleware/error.js");
 
 app.use(
-	cors({
-		origin: ["http://localhost:3000", "http://localhost:3001"],
-		credentials: true,
-		methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-	})
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "http://localhost:3002",
+    ],
+    credentials: true,
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  })
 );
 app.use(express.json());
 app.use(cookieParser());

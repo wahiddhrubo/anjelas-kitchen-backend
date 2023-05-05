@@ -38,7 +38,7 @@ function App() {
           {isAdmin ? (
             <Route path="*" element={<Layout />} />
           ) : isAuthenticated ? (
-            "You Can't acess the page"
+            <Route path="*" element={<NotFound />} />
           ) : (
             <>
               <Route path="/" element={<Login />} />
