@@ -33,22 +33,24 @@ exports.getCart = catchAsyncError(async (req, res, next) => {
 
 //ADD A ITEM TO A CART
 exports.addItemToCart = catchAsyncError(async (req, res, next) => {
-  const { item, pricePerUnit, quantity } = req.body;
-  const newItem = {
-    item,
-    pricePerUnit,
-    quantity,
-  };
+  const { item, pricePerUnit, quantity, variant } = req.body;
+  console.log(variant);
   const cartId = req.user.cart;
 
   const newCart = await Cart.findById(cartId);
-  let oldCart = await Cart.find({ _id: cartId, "items.item": item });
+  let oldCart = await Cart.find({
+    _id: cartId,
+    variant,
+    "items.item": item,
+    "items.variant": variant,
+  });
 
   if (!oldCart.length) {
     newCart.items.push({
       item,
       pricePerUnit,
       quantity,
+      variant: variant,
     });
     newCart.save();
   } else {
@@ -56,9 +58,10 @@ exports.addItemToCart = catchAsyncError(async (req, res, next) => {
       {
         _id: cartId,
         "items.item": item,
+        "items.variant": variant,
       },
       {
-        $set: {
+        $inc: {
           "items.$.quantity": quantity,
         },
       }
@@ -68,6 +71,28 @@ exports.addItemToCart = catchAsyncError(async (req, res, next) => {
   res.status(201).json({
     success: true,
     message: "Item Added",
+  });
+});
+
+exports.updateItemInCart = catchAsyncError(async (req, res, next) => {
+  const { item, quantity, variant } = req.body;
+  const cartId = req.user.cart;
+  let cart = await Cart.findOneAndUpdate(
+    {
+      _id: cartId,
+      "items.item": item,
+      "items.variant": variant,
+    },
+    {
+      $set: {
+        "items.$.quantity": quantity,
+      },
+    }
+  );
+
+  res.status(201).json({
+    success: true,
+    message: "Item Updated",
   });
 });
 

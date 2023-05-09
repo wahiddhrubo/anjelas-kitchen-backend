@@ -61,6 +61,9 @@ const itemsSlice = createSlice({
   reducers: {
     resetDelete: (state, action) => {
       state.isDeleted = false;
+      state.loading = false;
+      state.error = false;
+      state.success = false;
     },
   },
   extraReducers(builder) {

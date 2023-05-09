@@ -4,7 +4,10 @@ class ApiOptions {
   }
 
   searchAndFilterOptions(page, limit) {
-    const name = this.queryStr.keyword || "";
+    const name = this.queryStr.keyword
+      ? this.queryStr.keyword.replace("+", " ")
+      : "";
+    console.log(name);
     const cat = this.queryStr.categories || "";
     const tg = this.queryStr.tags || "";
 

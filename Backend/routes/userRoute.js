@@ -19,6 +19,7 @@ const {
   addItemToCart,
   removeItemFromCart,
   getCart,
+  updateItemInCart,
 } = require("../controllers/cartController.js");
 
 const {
@@ -62,6 +63,8 @@ router
   .route("/user/cart")
   .get(isAuthenticatedUser, getCart)
   .post(isAuthenticatedUser, addItemToCart);
+
+router.route("/update/cart").post(isAuthenticatedUser, updateItemInCart);
 
 router.route("/user/cart/:id").delete(isAuthenticatedUser, removeItemFromCart);
 

@@ -6,7 +6,7 @@ import Select from "react-select";
 import { Navigate, useNavigate } from "react-router-dom";
 import { checkEmptyField } from "../../utils/checkEmptyField.js";
 import { categoriesOpt, tagsOpt } from "../../lib/constants.js";
-import { createItem } from "../../redux/slice/items.js";
+import { createItem, resetDelete } from "../../redux/slice/items.js";
 import { triggerAlert } from "../../redux/slice/alert.js";
 import { useSelector, useDispatch } from "react-redux";
 
@@ -45,17 +45,12 @@ export default function AddItems({}) {
   const [skus, setSkus] = useState([]);
   const [skuId, setSkuId] = useState([]);
 
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertType, setAlertType] = useState();
-  const [alertMessage, setAlertMessage] = useState();
-
   const fields = {
     Name: name,
     Stock: stock,
     Description: description,
     Tags: tags,
     Categories: categories,
-    Gallery: gallery,
     "Featured Image": featuredImage,
     Skus: skus,
   };
@@ -68,6 +63,7 @@ export default function AddItems({}) {
           type: "success",
         })
       );
+      dispatch(resetDelete());
       navigate("/products");
     }
     if (error) {
