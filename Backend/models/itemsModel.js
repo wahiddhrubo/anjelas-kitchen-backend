@@ -77,6 +77,9 @@ const itemSchema = mongoose.Schema({
     ref: "User",
     required: true,
   },
+  reviewsNo: {
+    type: String,
+  },
 
   reviews: [
     {
