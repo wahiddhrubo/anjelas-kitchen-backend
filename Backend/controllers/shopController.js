@@ -16,6 +16,8 @@ exports.createItem = catchAsyncError(async (req, res, next) => {
 //GET ALL PRODUCTS WITH CATEGORIES AND PAGINATION -- USERS
 exports.getAllItems = catchAsyncError(async (req, res) => {
   const limit = parseInt(req.query.itemPerPage) || 10;
+  const sortBy = req.query.sortBy || "createdAt";
+
   const page = parseInt(req.query.page) || 1;
 
   const filteredItemsApi = new ApiOptions(req.query).searchAndFilterOptions(
@@ -27,11 +29,8 @@ exports.getAllItems = catchAsyncError(async (req, res) => {
 
   let items = await Item.aggregate([
     { $match: matchOptions },
-    // {
-    //   $unwind: "$reviews",
-    // },
     { $group: groupOptions },
-
+    { $sort: { [sortBy]: 1 } },
     { $facet: facet },
   ]);
 
@@ -39,6 +38,10 @@ exports.getAllItems = catchAsyncError(async (req, res) => {
     path: "data.user",
     select: "username",
     model: User,
+  });
+
+  items[0].data.forEach((item) => {
+    item.skus.sort((a, b) => a.price - b.price);
   });
 
   res.status(201).json({
@@ -59,6 +62,7 @@ exports.updateItem = catchAsyncError(async (req, res, next) => {
   });
   res.status(201).json({
     success: true,
+    sortBy,
     item,
   });
 });

@@ -31,6 +31,7 @@ const {
   createHomeLoc,
   createWorkLoc,
   createLoc,
+  deleteLoc,
 } = require("../controllers/locationController");
 
 const router = express.Router();
@@ -71,5 +72,6 @@ router.route("/user/cart/:id").delete(isAuthenticatedUser, removeItemFromCart);
 router.route("/user/locations").post(isAuthenticatedUser, createLoc);
 router.route("/user/locations/home").post(isAuthenticatedUser, createHomeLoc);
 router.route("/user/locations/work").post(isAuthenticatedUser, createWorkLoc);
+router.route("/user/locations").delete(isAuthenticatedUser, deleteLoc);
 
 module.exports = router;

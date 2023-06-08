@@ -6,6 +6,7 @@ import { logout } from "../../redux/slice/authentication.js";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { test } from "../../redux/slice/users.js";
 
 export default function Sidebar({ links, addLinks }) {
   const dispatch = useDispatch();
@@ -101,6 +102,11 @@ export default function Sidebar({ links, addLinks }) {
                   </Link>
                 </li>
               ))}
+              <li className="items-center">
+                <Link onClick={() => dispatch(test())} className={styles.link}>
+                  test
+                </Link>
+              </li>
             </ul>
             <h6 className={styles.linkHeading}>Add New</h6>
             <ul className={styles.linkList}>

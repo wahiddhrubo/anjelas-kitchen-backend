@@ -114,16 +114,6 @@ exports.getAccount = catchAsyncError(async (req, res, next) => {
       model: Location,
       select: { area: 1, streetAddress: 1, _id: 1 },
     },
-    {
-      path: "cart",
-      model: Cart,
-      select: { items: 1, _id: 1 },
-      populate: {
-        path: "items.item",
-        model: Item,
-        select: { featuredImage: 1, name: 1, _id: 1 },
-      },
-    },
   ];
   const user = await User.findById(req.user.id).populate(populateQuery);
   if (!user) {

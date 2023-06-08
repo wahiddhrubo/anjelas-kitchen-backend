@@ -34,7 +34,9 @@ exports.getCart = catchAsyncError(async (req, res, next) => {
 //ADD A ITEM TO A CART
 exports.addItemToCart = catchAsyncError(async (req, res, next) => {
   const { item, pricePerUnit, quantity, variant } = req.body;
-  console.log(variant);
+  if (item || pricePerUnit || quantity || variant) {
+    return next(new ErrorHandler("Enter All Info Correctly", 400));
+  }
   const cartId = req.user.cart;
 
   const newCart = await Cart.findById(cartId);

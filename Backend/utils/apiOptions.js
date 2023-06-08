@@ -54,6 +54,7 @@ class ApiOptions {
           max: { $max: "$skus.price" },
         },
       },
+      skus: { $first: "$skus" },
       ratingAvg: { $avg: "$reviews.rating" },
       createdAt: { $first: "$created_at" },
       user: { $first: "$user" },

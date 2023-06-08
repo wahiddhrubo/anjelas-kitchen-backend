@@ -5,170 +5,226 @@ const Cart = require("../models/cartModel");
 const Location = require("../models/locationModel");
 const Item = require("../models/itemsModel.js");
 const catchAsyncError = require("../utils/catchAsyncError.js");
+const axios = require("axios");
+const querystring = require("querystring");
+const { Curl } = require("node-libcurl");
+const curlTest = new Curl();
+const request = require("request");
+const terminate = curlTest.close.bind(curlTest);
 
 //CREATE ORDERS
 exports.createOrder = catchAsyncError(async (req, res, next) => {
-	const {
-		location,
-		deliveryCharge,
-		paymentType,
-		taxRate,
-		paymentMethod,
-		transactionId,
-		deliveryDate,
-		deliveryTime,
-	} = req.body;
+  const {
+    location,
+    deliveryCharge,
+    paymentType,
+    taxRate,
+    paymentMethod,
+    transactionId,
+    deliveryDate,
+    deliveryTime,
+  } = req.body;
 
-	const user = await User.findById(req.user.id);
-	const cart = await Cart.findById(user.cart);
-	const subTotal = cart.items.reduce(
-		(total, i) => total + i.quantity * i.pricePerUnit,
-		0
-	);
-	const tax = taxRate * 0.01 * subTotal;
-	const total = subTotal + tax + deliveryCharge;
+  const user = await User.findById(req.user.id);
+  const cart = await Cart.findById(user.cart);
+  const subTotal = cart.items.reduce(
+    (total, i) => total + i.quantity * i.pricePerUnit,
+    0
+  );
+  const tax = taxRate * 0.01 * subTotal;
+  const total = subTotal + tax + deliveryCharge;
 
-	const order = await Order.create({
-		location,
-		subTotal,
-		deliveryCharge,
-		tax,
-		total,
-		paymentType,
-		paymentMethod,
-		transactionId,
-		deliveryDate,
-		deliveryTime,
-		items: cart.items,
-		user: user._id,
-	});
-	user.orders.push(order._id);
-	user.save();
-	cart.items = [];
-	cart.save();
+  const order = await Order.create({
+    location,
+    subTotal,
+    deliveryCharge,
+    tax,
+    total,
+    paymentType,
+    paymentMethod,
+    transactionId,
+    deliveryDate,
+    deliveryTime,
+    items: cart.items,
+    user: user._id,
+  });
+  user.orders.push(order._id);
+  user.save();
+  cart.items = [];
+  cart.save();
 
-	res.status(201).json({
-		success: true,
-		order,
-	});
+  res.status(201).json({
+    success: true,
+    order,
+  });
 });
 
 //GET ALL ORDERS --USER
 exports.getAllUserOrders = catchAsyncError(async (req, res, next) => {
-	const populateQuery = [
-		{
-			path: "user",
-			model: User,
-			select: { username: 1, _id: 1 },
-		},
-		{
-			path: "location",
-			model: Location,
-			select: { phone: 1, area: 1, streetAddress: 1, _id: 1 },
-		},
-		{
-			path: "items.item",
-			model: Item,
-			select: { name: 1, _id: 0 },
-		},
-	];
+  const populateQuery = [
+    {
+      path: "user",
+      model: User,
+      select: { username: 1, _id: 1 },
+    },
+    {
+      path: "location",
+      model: Location,
+      select: { phone: 1, area: 1, streetAddress: 1, _id: 1 },
+    },
+    {
+      path: "items.item",
+      model: Item,
+      select: { name: 1, _id: 0 },
+    },
+  ];
 
-	const user = req.user.id;
-	const orders = await Order.find({ user }).populate(populateQuery).lean();
-	res.status(201).json({
-		success: true,
-		orders,
-	});
+  const user = req.user.id;
+  const orders = await Order.find({ user }).populate(populateQuery).lean();
+  res.status(201).json({
+    success: true,
+    orders,
+  });
 });
 
 //GET SINGLE ORDER --USER
 exports.getSingleUserOrders = catchAsyncError(async (req, res, next) => {
-	const user = req.user.id;
-	const { id } = req.params;
-	console.log("hello");
+  const user = req.user.id;
+  const { id } = req.params;
+  console.log("hello");
 
-	const orders = await Order.findOne({ user, id });
-	res.status(201).json({
-		success: true,
-		orders,
-		id,
-		user,
-	});
+  const orders = await Order.findOne({ user, id });
+  res.status(201).json({
+    success: true,
+    orders,
+    id,
+    user,
+  });
 });
 
 //GET ALL ORDERS BY STATUS --USER
 exports.getAllUserOrdersByStatus = catchAsyncError(async (req, res, next) => {
-	const populateQuery = {
-		path: "user",
-		model: User,
-		select: { username: 1, _id: 1 },
-	};
+  const populateQuery = {
+    path: "user",
+    model: User,
+    select: { username: 1, _id: 1 },
+  };
 
-	const user = req.user.id;
-	const { status } = req.params;
-	const orders = await Order.find({ user, status })
-		.populate(populateQuery)
-		.lean();
-	res.status(201).json({
-		success: true,
-		orders,
-	});
+  const user = req.user.id;
+  const { status } = req.params;
+  const orders = await Order.find({ user, status })
+    .populate(populateQuery)
+    .lean();
+  res.status(201).json({
+    success: true,
+    orders,
+  });
 });
 
 //GET ALL ORDERS --ADMIN
 exports.getAllOrders = catchAsyncError(async (req, res, next) => {
-	const populateQuery = [
-		{
-			path: "user",
-			model: User,
-			select: { username: 1, _id: 1 },
-		},
-		{
-			path: "location",
-			model: Location,
-			select: { phone: 1, area: 1, streetAddress: 1, _id: 1 },
-		},
-		{
-			path: "items.item",
-			model: Item,
-			select: { name: 1, _id: 0 },
-		},
-	];
+  const populateQuery = [
+    {
+      path: "user",
+      model: User,
+      select: { username: 1, _id: 1 },
+    },
+    {
+      path: "location",
+      model: Location,
+      select: { phone: 1, area: 1, streetAddress: 1, _id: 1 },
+    },
+    {
+      path: "items.item",
+      model: Item,
+      select: { name: 1, _id: 0 },
+    },
+  ];
 
-	const orders = await Order.find({}).populate(populateQuery).lean();
-	res.status(201).json({
-		success: true,
-		orders,
-	});
+  const orders = await Order.find({}).populate(populateQuery).lean();
+  res.status(201).json({
+    success: true,
+    orders,
+  });
 });
 
 //GET SINGLE ORDER --ADMIN
 exports.getSingleOrders = catchAsyncError(async (req, res, next) => {
-	const { id } = req.params;
-	const orders = await Order.findById(id);
-	res.status(201).json({
-		success: true,
-		orders,
-	});
+  const { id } = req.params;
+  const orders = await Order.findById(id);
+  res.status(201).json({
+    success: true,
+    orders,
+  });
 });
 
 //GET ALL ORDERS BY STATUS --ADMIN
 exports.getAllOrdersByStatus = catchAsyncError(async (req, res, next) => {
-	const { status } = req.params;
-	const orders = await Order.find({ status });
-	res.status(201).json({
-		success: true,
-		orders,
-	});
+  const { status } = req.params;
+  const orders = await Order.find({ status });
+  res.status(201).json({
+    success: true,
+    orders,
+  });
 });
 
 //UPDATE ORDER  STATUS --ADMIN
 exports.updateOrderStatus = catchAsyncError(async (req, res, next) => {
-	const { status } = req.body;
-	const { id } = req.params;
-	const orders = await Order.findByIdAndUpdate(id, { status });
-	res.status(201).json({
-		success: true,
-		orders,
-	});
+  const { status } = req.body;
+  const { id } = req.params;
+  const orders = await Order.findByIdAndUpdate(id, { status });
+  res.status(201).json({
+    success: true,
+    orders,
+  });
+});
+
+exports.payment = catchAsyncError(async (req, res, next) => {
+  const { status } = req.body;
+  const { id } = req.params;
+
+  const data = {
+    api: process.env.EDOKAN_API_KEY,
+    secret: process.env.EDOKAN_API_SECRET,
+    client: process.env.EDOKAN_API_CLIENT,
+    position: "http://localhost:3001",
+    amount: 10,
+    cus_name: "wahid",
+    cus_email: "wahiddhrubo@gmail.com",
+    success_url: "google.com",
+    cancel_url: "fb.com",
+  };
+  // const curlTest = new Curl();
+  // curlTest.setOpt("URL", "https://pay.edokanpay.com/checkout.php");
+  // curlTest.setOpt("POST", true);
+
+  request(
+    "https://pay.edokanpay.com/checkout.php",
+    function (error, response, body) {
+      if (!error && response.statusCode == 200) {
+        console.log(body);
+      } else {
+        console.log(error);
+      }
+    }
+  );
+
+  // try {
+  //   const result = await axios({
+  //     url: "https://pay.edokanpay.com/checkout.php",
+  //     method: "post",
+  //     data: JSON.stringify(data),
+  //   });
+  //   console.log(result);
+
+  //   res.status(201).json({
+  //     success: true,
+  //   });
+  // } catch (err) {
+  //   console.log(err);
+  //   res.status(201).json({
+  //     success: false,
+  //     error: err.response,
+  //   });
+  // }
 });

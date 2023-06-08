@@ -1,18 +1,19 @@
 const express = require("express");
 const {
-	createOrder,
-	getAllUserOrders,
-	getSingleUserOrders,
-	getAllUserOrdersByStatus,
-	getAllOrders,
-	getSingleOrders,
-	getAllOrdersByStatus,
-	updateOrderStatus,
+  createOrder,
+  getAllUserOrders,
+  getSingleUserOrders,
+  getAllUserOrdersByStatus,
+  getAllOrders,
+  getSingleOrders,
+  getAllOrdersByStatus,
+  updateOrderStatus,
+  payment,
 } = require("../controllers/orderController.js");
 
 const {
-	isAuthorized,
-	isAuthenticatedUser,
+  isAuthorized,
+  isAuthenticatedUser,
 } = require("../middleware/authUser.js");
 
 const router = express.Router();
@@ -22,17 +23,18 @@ router.route("/order").post(isAuthenticatedUser, createOrder);
 router.route("/user/orders").get(isAuthenticatedUser, getAllUserOrders);
 
 router
-	.route("/user/orders/:status")
-	.get(isAuthenticatedUser, getAllUserOrdersByStatus);
+  .route("/user/orders/:status")
+  .get(isAuthenticatedUser, getAllUserOrdersByStatus);
 router
-	.route("/user/orders/order/:id")
-	.get(isAuthenticatedUser, getSingleUserOrders);
+  .route("/user/orders/order/:id")
+  .get(isAuthenticatedUser, getSingleUserOrders);
 
 //ADMIN ORDER
 router.route("/admin/orders").get(isAuthenticatedUser, getAllOrders);
 router
-	.route("/admin/orders/:id")
-	.get(isAuthenticatedUser, getSingleOrders)
-	.post(isAuthenticatedUser, updateOrderStatus);
+  .route("/admin/orders/:id")
+  .get(isAuthenticatedUser, getSingleOrders)
+  .post(isAuthenticatedUser, updateOrderStatus);
 
+router.route("/test-payment").get(payment);
 module.exports = router;
