@@ -9,6 +9,7 @@ const {
   getAllOrdersByStatus,
   updateOrderStatus,
   payment,
+  createOrUpdateReview,
 } = require("../controllers/orderController.js");
 
 const {
@@ -28,6 +29,9 @@ router
 router
   .route("/user/orders/order/:id")
   .get(isAuthenticatedUser, getSingleUserOrders);
+
+//CREATE OR UPDATE REVIEW
+router.route("/user/review").post(isAuthenticatedUser, createOrUpdateReview);
 
 //ADMIN ORDER
 router.route("/admin/orders").get(isAuthenticatedUser, getAllOrders);

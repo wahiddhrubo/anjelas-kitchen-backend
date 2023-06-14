@@ -80,23 +80,11 @@ const itemSchema = mongoose.Schema({
   reviewsNo: {
     type: String,
   },
-
   reviews: [
     {
-      name: {
-        type: String,
-        required: true,
-      },
-      comment: {
-        type: String,
-        required: true,
-      },
-      rating: {
-        type: Number,
-        required: true,
-        min: 1,
-        max: 5,
-      },
+      type: mongoose.Schema.ObjectId,
+      ref: "Review",
+      required: true,
     },
   ],
   created_at: {

@@ -16,11 +16,11 @@ exports.createItem = catchAsyncError(async (req, res, next) => {
 //GET ALL PRODUCTS WITH CATEGORIES AND PAGINATION -- USERS
 exports.getAllItems = catchAsyncError(async (req, res) => {
   const limit = parseInt(req.query.itemPerPage) || 10;
+  const page = parseInt(req.query.page) || 1;
 
   // SORTING OPTIONS =["skus.price","name","reviewsNo","reviews.rating","createdAt---[default]"]
   const sortBy = req.query.sortBy || "createdAt";
-
-  const page = parseInt(req.query.page) || 1;
+  // const order = parseInt(req.query.order) || 1;
 
   const filteredItemsApi = new ApiOptions(req.query).searchAndFilterOptions(
     page,

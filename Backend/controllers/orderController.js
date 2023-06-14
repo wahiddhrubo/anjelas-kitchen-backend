@@ -3,6 +3,7 @@ const ErrorHandler = require("../utils/errorHandler.js");
 const User = require("../models/userModel");
 const Cart = require("../models/cartModel");
 const Location = require("../models/locationModel");
+const Review = require("../models/reviewModel");
 const Item = require("../models/itemsModel.js");
 const catchAsyncError = require("../utils/catchAsyncError.js");
 const axios = require("axios");
@@ -11,38 +12,42 @@ const { Curl } = require("node-libcurl");
 const curlTest = new Curl();
 const request = require("request");
 const terminate = curlTest.close.bind(curlTest);
+const crypto = require("crypto");
 
 //CREATE ORDERS
 exports.createOrder = catchAsyncError(async (req, res, next) => {
   const {
     location,
     deliveryCharge,
-    paymentType,
-    taxRate,
+    tax,
+    subTotal,
+    total,
+    coupon,
+    discount,
     paymentMethod,
-    transactionId,
     deliveryDate,
     deliveryTime,
   } = req.body;
 
+  const uID = crypto.randomBytes(6).toString("hex");
+
   const user = await User.findById(req.user.id);
   const cart = await Cart.findById(user.cart);
-  const subTotal = cart.items.reduce(
-    (total, i) => total + i.quantity * i.pricePerUnit,
-    0
-  );
-  const tax = taxRate * 0.01 * subTotal;
-  const total = subTotal + tax + deliveryCharge;
+  console.log(cart.items.length);
+  if (!cart.items.length) {
+    return next(new ErrorHandler("No Item Found In Cart", 404));
+  }
 
   const order = await Order.create({
+    uID,
     location,
     subTotal,
     deliveryCharge,
     tax,
+    coupon,
+    discount,
     total,
-    paymentType,
     paymentMethod,
-    transactionId,
     deliveryDate,
     deliveryTime,
     items: cart.items,
@@ -91,7 +96,6 @@ exports.getAllUserOrders = catchAsyncError(async (req, res, next) => {
 exports.getSingleUserOrders = catchAsyncError(async (req, res, next) => {
   const user = req.user.id;
   const { id } = req.params;
-  console.log("hello");
 
   const orders = await Order.findOne({ user, id });
   res.status(201).json({
@@ -173,6 +177,38 @@ exports.updateOrderStatus = catchAsyncError(async (req, res, next) => {
   const { status } = req.body;
   const { id } = req.params;
   const orders = await Order.findByIdAndUpdate(id, { status });
+  res.status(201).json({
+    success: true,
+    orders,
+  });
+});
+
+// CREATE OR UPDATE REVIEW  --USER
+exports.createOrUpdateReview = catchAsyncError(async (req, res, next) => {
+  const { orderId, itemId, rating, comment } = req.body;
+  const user = req.user.id;
+  const itemInOrder = await Item.findById(itemId);
+  const orders = await Order.find({
+    user,
+    _id: orderId,
+    "items.item": itemId,
+  });
+
+  if (!orders.length) {
+    return next(new ErrorHandler("No Order Found", 404));
+  }
+
+  const review = Review.create({
+    item: itemId,
+    order: orderId,
+    rating,
+    comment,
+    user,
+  });
+
+  await itemInOrder.reviews.push(review._id);
+  await itemInOrder.save();
+
   res.status(201).json({
     success: true,
     orders,
