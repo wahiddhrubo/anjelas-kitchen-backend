@@ -31,6 +31,10 @@ const orderSchema = mongoose.Schema({
         required: true,
         max: 100,
       },
+      variant: {
+        type: String,
+        // required: true,
+      },
     },
   ],
   deliveryDate: {

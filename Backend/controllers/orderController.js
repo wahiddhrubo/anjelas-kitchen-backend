@@ -66,6 +66,26 @@ exports.createOrder = catchAsyncError(async (req, res, next) => {
 
 //GET ALL ORDERS --USER
 exports.getAllUserOrders = catchAsyncError(async (req, res, next) => {
+  const user = req.user.id;
+  const populateQuery = [
+    {
+      path: "location",
+      model: Location,
+      select: { phone: 1, area: 1, streetAddress: 1, _id: 1 },
+    },
+  ];
+  const orders = await Order.find({ user }).populate(populateQuery).lean();
+  res.status(201).json({
+    success: true,
+    orders,
+  });
+});
+
+//GET SINGLE ORDER --USER
+exports.getSingleUserOrders = catchAsyncError(async (req, res, next) => {
+  const user = req.user.id;
+  const { id } = req.params;
+  console.log(id);
   const populateQuery = [
     {
       path: "user",
@@ -80,29 +100,16 @@ exports.getAllUserOrders = catchAsyncError(async (req, res, next) => {
     {
       path: "items.item",
       model: Item,
-      select: { name: 1, _id: 0 },
+      select: { name: 1, _id: 1, featuredImage: 1, skus: 1 },
     },
   ];
 
-  const user = req.user.id;
-  const orders = await Order.find({ user }).populate(populateQuery).lean();
+  const order = await Order.findOne({ user, _id: id })
+    .populate(populateQuery)
+    .lean();
   res.status(201).json({
     success: true,
-    orders,
-  });
-});
-
-//GET SINGLE ORDER --USER
-exports.getSingleUserOrders = catchAsyncError(async (req, res, next) => {
-  const user = req.user.id;
-  const { id } = req.params;
-
-  const orders = await Order.findOne({ user, id });
-  res.status(201).json({
-    success: true,
-    orders,
-    id,
-    user,
+    order,
   });
 });
 
