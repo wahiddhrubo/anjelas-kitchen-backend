@@ -8,10 +8,7 @@ const Item = require("../models/itemsModel.js");
 const catchAsyncError = require("../utils/catchAsyncError.js");
 const axios = require("axios");
 const querystring = require("querystring");
-const { Curl } = require("node-libcurl");
-const curlTest = new Curl();
-const request = require("request");
-const terminate = curlTest.close.bind(curlTest);
+
 const crypto = require("crypto");
 
 //CREATE ORDERS
