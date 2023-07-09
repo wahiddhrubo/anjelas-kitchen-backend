@@ -10,7 +10,7 @@ const sendToken = (user, res, statusCode) => {
     httpOnly: true,
     domain: ".localhost",
     secure: true,
-    sameSite: "none",
+    // sameSite: "none",
   };
   console.log({ statusCode, token, options });
 
