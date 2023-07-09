@@ -1,5 +1,3 @@
-const { none } = require("./cloudinary");
-
 const sendToken = (user, res, statusCode) => {
   const token = user.getJwtToken();
 
@@ -7,9 +5,9 @@ const sendToken = (user, res, statusCode) => {
     expires: new Date(
       new Date().getTime() + process.env.COOKIE_EXPIRE * 24 * 60 * 60
     ),
-    httpOnly: true,
-    domain: ".localhost",
-    secure: true,
+    // httpOnly: true,
+    // domain: ".localhost",
+    // secure: true,
     // sameSite: "none",
   };
   console.log({ statusCode, token, options });
